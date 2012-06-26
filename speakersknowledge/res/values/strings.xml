@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<!--
+    Copyright (C) 2011 Qualcomm Labs, Inc. All rights reserved.
+
+    This software is the confidential and proprietary information of Qualcomm Labs,
+    Inc.
+
+    The following sample code illustrates various aspects of the UserContext SDK.
+
+    The sample code herein is provided for your convenience, and has not been
+    tested or designed to work on any particular system configuration. It is
+    provided AS IS and your use of this sample code, whether as provided or with
+    any modification, is at your own risk. Neither Qualcomm Labs, Inc. nor any
+    affiliate takes any liability nor responsibility with respect to the sample
+    code, and disclaims all warranties, express and implied, including without
+    limitation warranties on merchantability, fitness for a specified purpose,
+    and against infringement.
+-->
+<resources>
+    <string name="app_name">Mallmart</string>
+    <string name="terms_of_service_not_accepted">Terms of service not yet accepted</string>
+    <string name="download_usercontext">Get Mall-mart Deals</string>
+    <string name="location">Location:</string>
+    <string name="content">Content:</string>
+    <string name="unknown">Unknown</string>
+    <string name="disabled">UserContext turned off by user</string>
+    <string name="usercontext_not_registered">Not initialized</string>
+    <string name="accept_terms">Please accept terms</string>
+    <string name="save">Save for later</string>
+    <string name="not_now">Not now</string>
+    <string name="location_disabled">Location Permission turned off by user</string>
+</resources>
