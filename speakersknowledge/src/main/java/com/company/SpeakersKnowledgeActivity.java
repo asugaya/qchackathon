@@ -18,11 +18,11 @@
 
 package com.company;
 
-import java.util.List;
-
 import android.app.Activity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
+import android.view.View.OnClickListener;
 
 import com.apx.speakersknowledge.R;
 import com.qualcommlabs.context.ir.sdk.ContextImageRecognitionConnector;
@@ -38,35 +38,29 @@ import com.qualcommlabs.usercontext.ContextPlaceConnectorFactory;
 import com.qualcommlabs.usercontext.PermissionChangeListener;
 import com.qualcommlabs.usercontext.PlaceEventListener;
 import com.qualcommlabs.usercontext.StatusCallback;
-import com.qualcommlabs.usercontext.protocol.ContentDescriptor;
-import com.qualcommlabs.usercontext.protocol.ContentDescriptorHistory;
 import com.qualcommlabs.usercontext.protocol.ContentEvent;
 import com.qualcommlabs.usercontext.protocol.ContextConnectorPermissions;
 import com.qualcommlabs.usercontext.protocol.PlaceEvent;
-import com.qualcommlabs.usercontext.protocol.profile.Profile;
 
-public class MallMartActivity extends Activity {
+public class SpeakersKnowledgeActivity extends Activity implements OnClickListener {
 
-    private static final String TAG = "MallMart";
+    private static final String TAG = "SpeakersKnowledge";
 
     private ContextCoreConnector contextCoreConnector;
     private ContextInterestsConnector contextInterestsConnector;
     private ContextPlaceConnector contextPlaceConnector;
     private ContextImageRecognitionConnector imageRecognitionConnector;
 
-    private MallMartPresenter mallMartPresenter;
 
     PlaceEventListener placeEventListener = new PlaceEventListener() {
         @Override
         public void placeEvent(PlaceEvent placeEvent) {
-            mallMartPresenter.updatePlaceEventTextView(placeEvent);
         }
     };
 
     ContentListener contentListener = new ContentListener() {
         @Override
         public void contentEvent(ContentEvent contentEvent) {
-            mallMartPresenter.updateContentTextAndSetOnClick(contentEvent);
         }
     };
 
@@ -80,8 +74,9 @@ public class MallMartActivity extends Activity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mallMartPresenter = new MallMartPresenter(this);
-        mallMartPresenter.initializeView();
+        setContentView(R.layout.main);
+        
+        findViewById(R.id.scanImage).setOnClickListener(this);
         contextCoreConnector = ContextCoreConnectorFactory.get(this);
         contextInterestsConnector = ContextInterestsConnectorFactory.get(this);
         contextPlaceConnector = ContextPlaceConnectorFactory.get(this);
@@ -103,13 +98,11 @@ public class MallMartActivity extends Activity {
             @Override
             public void enabled(ContextConnectorPermissions contextConnectorPermissions) {
                 contextConnectorEnabled();
-                mallMartPresenter.updatePermissionTextView(contextConnectorPermissions);
             }
 
             @Override
             public void disabled(int statusCode, String message) {
                 toastAndLogError(message);
-                mallMartPresenter.showEnableContextConnectorButton();
 
             }
         });
@@ -124,7 +117,6 @@ public class MallMartActivity extends Activity {
 
             @Override
             public void failure(int statusCode, String errorMessage) {
-                mallMartPresenter.onContextConnectorEnableFailure(errorMessage);
             }
         });
     }
@@ -144,17 +136,15 @@ public class MallMartActivity extends Activity {
     }
 
     private void contextConnectorEnabled() {
-        mallMartPresenter.onContextConnectorInitializationSuccess();
         getLatestContentEventAndStartListeningForContentEvents();
         getLatestPlaceEventsAndStartListeningForPlaceEvents();
         startListeningForPermissionChanges();
         getProfileAndSendToLog();
-        mallMartPresenter.showSettings();
         retrieveImageRecognitionTargets();
     }
 
     private void retrieveImageRecognitionTargets() {
-        imageRecognitionConnector.retrieveTargetBundle(MallMartActivity.this, new Callback<Void>() {
+        imageRecognitionConnector.retrieveTargetBundle(SpeakersKnowledgeActivity.this, new Callback<Void>() {
             @Override
             public void success(Void responseObject) {
                 Log.d(TAG, "Successfully retrieved targets");
@@ -168,14 +158,14 @@ public class MallMartActivity extends Activity {
     }
 
     private void getProfileAndSendToLog() {
-        contextInterestsConnector.requestProfile(new AbstractFailureLoggingCallback<Profile>(mallMartPresenter) {
-            @Override
-            public void success(Profile profile) {
-                if (profile != null) {
-                    Log.d(TAG, profile.toString());
-                }
-            }
-        });
+//        contextInterestsConnector.requestProfile(new AbstractFailureLoggingCallback<Profile>(mallMartPresenter) {
+//            @Override
+//            public void success(Profile profile) {
+//                if (profile != null) {
+//                    Log.d(TAG, profile.toString());
+//                }
+//            }
+//        });
     }
 
     private void getLatestPlaceEventsAndStartListeningForPlaceEvents() {
@@ -189,27 +179,27 @@ public class MallMartActivity extends Activity {
     }
 
     private void getLatestPlaceEvents() {
-        contextPlaceConnector.requestLatestPlaceEvents(new AbstractFailureLoggingCallback<List<PlaceEvent>>(
-                mallMartPresenter) {
-            @Override
-            public void success(List<PlaceEvent> placeEvent) {
-                mallMartPresenter.updatePlaceEventTextView(placeEvent.get(0));
-            }
-
-        });
+//        contextPlaceConnector.requestLatestPlaceEvents(new AbstractFailureLoggingCallback<List<PlaceEvent>>(
+//                mallMartPresenter) {
+//            @Override
+//            public void success(List<PlaceEvent> placeEvent) {
+//                mallMartPresenter.updatePlaceEventTextView(placeEvent.get(0));
+//            }
+//
+//        });
     }
 
     private void getContentHistory() {
-        contextCoreConnector.requestContentHistory(new AbstractFailureLoggingCallback<List<ContentDescriptorHistory>>(
-                mallMartPresenter) {
-            @Override
-            public void success(List<ContentDescriptorHistory> contentDescriptorHistories) {
-                if (!contentDescriptorHistories.isEmpty()) {
-                    ContentDescriptor contentDescriptor = contentDescriptorHistories.get(0).getContentDescriptor();
-                    mallMartPresenter.updateContextTextAndSetOnClick(contentDescriptor);
-                }
-            }
-        });
+//        contextCoreConnector.requestContentHistory(new AbstractFailureLoggingCallback<List<ContentDescriptorHistory>>(
+//                mallMartPresenter) {
+//            @Override
+//            public void success(List<ContentDescriptorHistory> contentDescriptorHistories) {
+//                if (!contentDescriptorHistories.isEmpty()) {
+//                    ContentDescriptor contentDescriptor = contentDescriptorHistories.get(0).getContentDescriptor();
+//                    mallMartPresenter.updateContextTextAndSetOnClick(contentDescriptor);
+//                }
+//            }
+//        });
     }
 
     private void startListeningForContentEvents() {
@@ -237,7 +227,6 @@ public class MallMartActivity extends Activity {
     }
 
     public void toastAndLogError(String errorMessage) {
-        mallMartPresenter.toastAndLogError(errorMessage);
     }
 
     public void showImageRecognitionUI() {
@@ -253,4 +242,14 @@ public class MallMartActivity extends Activity {
             }
         });
     }
+
+	@Override
+	public void onClick(View v) {
+		switch (v.getId()) {
+		case R.id.scanImage: {
+			showImageRecognitionUI();
+			break;
+		}
+		}
+	}
 }
