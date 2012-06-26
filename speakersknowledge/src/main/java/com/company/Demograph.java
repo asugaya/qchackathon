@@ -1,5 +1,6 @@
 package com.company;
 
+import java.util.Iterator;
 import java.util.Vector;
 
 import org.json.JSONException;
@@ -25,10 +26,10 @@ public class Demograph {
 	public int education;
 
 	public static final int ETH_AFRICAN_AMERICAN = 0;
-	public static final int ETH_ASIAN = 0;
-	public static final int ETH_CAUCASIAN = 0;
-	public static final int ETH_HISPANIC = 0;
-	public static final int ETH_OTHER = 0;
+	public static final int ETH_ASIAN = 1;
+	public static final int ETH_CAUCASIAN = 2;
+	public static final int ETH_HISPANIC = 3;
+	public static final int ETH_OTHER = 4;
 	public int ethnicity;
 
 	public static final int INCOME_0K_30K = 0;
@@ -58,5 +59,40 @@ public class Demograph {
 		}
 		return retval;
 	}
+	
+	public static Demograph fromJSON(JSONObject jObject) {
+
+		Demograph newDemograph = new Demograph();
+		jObject.keys();
+		Iterator<?> keys = jObject.keys();
+		try {
+		while(keys.hasNext()){
+			String key = (String)keys.next(); 
+			//HACK
+			if (key.equals("age")){
+				newDemograph.age = jObject.getInt(key);
+			}else if(key.equals("gender")){
+				newDemograph.gender = jObject.getInt(key);
+			}else if(key.equals("education")){
+				newDemograph.education = jObject.getInt(key);
+			}else if(key.equals("ethnicity")){
+				newDemograph.ethnicity = jObject.getInt(key);
+			}else if(key.equals("income")){
+				newDemograph.income = jObject.getInt(key);
+			}else if(key.equals("interests")){
+				newDemograph.interests = (Vector<String>)jObject.get(key);
+			}else if(key.equals("kids")){
+				
+					newDemograph.kids = jObject.getBoolean(key);
+			}
+		}
+		} catch (JSONException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	
+		return newDemograph;
+	}
+
 
 }

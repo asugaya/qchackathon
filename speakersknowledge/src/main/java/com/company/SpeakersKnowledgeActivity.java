@@ -18,6 +18,10 @@
 
 package com.company;
 
+import java.util.List;
+import java.util.Vector;
+import java.util.Map;
+
 import android.app.Activity;
 import android.os.Bundle;
 import android.util.Log;
@@ -41,6 +45,9 @@ import com.qualcommlabs.usercontext.StatusCallback;
 import com.qualcommlabs.usercontext.protocol.ContentEvent;
 import com.qualcommlabs.usercontext.protocol.ContextConnectorPermissions;
 import com.qualcommlabs.usercontext.protocol.PlaceEvent;
+import com.qualcommlabs.usercontext.protocol.profile.AttributeCategory;
+import com.qualcommlabs.usercontext.protocol.profile.Profile;
+import com.qualcommlabs.usercontext.protocol.profile.ProfileAttribute;
 
 public class SpeakersKnowledgeActivity extends Activity implements OnClickListener {
 
@@ -50,7 +57,7 @@ public class SpeakersKnowledgeActivity extends Activity implements OnClickListen
     private ContextInterestsConnector contextInterestsConnector;
     private ContextPlaceConnector contextPlaceConnector;
     private ContextImageRecognitionConnector imageRecognitionConnector;
-
+    private Demograph userDemograph;
 
     PlaceEventListener placeEventListener = new PlaceEventListener() {
         @Override
@@ -70,7 +77,163 @@ public class SpeakersKnowledgeActivity extends Activity implements OnClickListen
             checkContextConnectorStatus();
         }
     };
+    
+    /***
+     * This returns the demograph for this user, or null if not set yet.
+     */
+    public Demograph getDemograph(){
+    	contextInterestsConnector.requestProfile(new Callback<Profile>() {
+            @Override
+            public void success(Profile profile) {
+                if (profile != null) {
+                	userDemograph = new Demograph();
+                    Log.d(TAG, profile.toString());
+                    Map<String,ProfileAttribute> profileAttributes = profile.getAttributes();
+                    for (Map.Entry<String, ProfileAttribute> entry : profileAttributes.entrySet())
+                    {
+                        Log.d(TAG, entry.getKey() + ":::");
+                        //HACK
+                        String entryKey = entry.getKey();
+                        double highestLikelihood = 0.0;
+                        int bestLikelihoodCategory = 0;
+                        
+                        List<AttributeCategory> attributeCategories = entry.getValue().getAttributeCategories();
+                        
+                        
+                        if(entryKey.equals("Age")){
+                        	for(AttributeCategory aCat: attributeCategories){
+                        		double likelihood = aCat.getLikelihood();
+                        		if(likelihood > highestLikelihood){
+                        			highestLikelihood = likelihood;
+                        			String aCatKey = aCat.getKey();
+                        			//DOUBLE HACK
+                        			if(aCatKey.equals("13 - 18")){
+                        				bestLikelihoodCategory = 0;
+                        			}else if(aCatKey.equals("18 - 24")){
+                        				bestLikelihoodCategory = 1;
+                        			}else if(aCatKey.equals("25 - 34")){
+                        				bestLikelihoodCategory = 2;
+                        			}else if(aCatKey.equals("35 - 44")){
+                        				bestLikelihoodCategory = 3;
+                        			} else if(aCatKey.equals("45 - 54")){
+                        				bestLikelihoodCategory = 4;
+                        			} else if(aCatKey.equals("55+")){
+                        				bestLikelihoodCategory = 5;
+                        			}
+                        		}
+                            	Log.d(TAG, aCat.getKey() + " : " + aCat.getLikelihood());
+                            }
+                        	userDemograph.age = bestLikelihoodCategory;
+                        }else if(entryKey.equals("Education")){
+                        	for(AttributeCategory aCat: attributeCategories){
+                        		double likelihood = aCat.getLikelihood();
+                        		if(likelihood > highestLikelihood){
+                        			highestLikelihood = likelihood;
+                        			String aCatKey = aCat.getKey();
+                        			//DOUBLE HACK
+                        			if(aCatKey.equals("College")){
+                        				bestLikelihoodCategory = 1;
+                        			}else if(aCatKey.equals("No College")){
+                        				bestLikelihoodCategory = 0;
+                        			}
+                        		}
+                            	Log.d(TAG, aCat.getKey() + " : " + aCat.getLikelihood());
+                            }
+                        	userDemograph.education = bestLikelihoodCategory;
+                        }else if(entryKey.equals("Gender")){
+                        	for(AttributeCategory aCat: attributeCategories){
+                        		double likelihood = aCat.getLikelihood();
+                        		if(likelihood > highestLikelihood){
+                        			highestLikelihood = likelihood;
+                        			String aCatKey = aCat.getKey();
+                        			//DOUBLE HACK
+                        			if(aCatKey.equals("Male")){
+                        				bestLikelihoodCategory = 0;
+                        			}else if(aCatKey.equals("Female")){
+                        				bestLikelihoodCategory = 1;
+                        			}
+                        		}
+                            	Log.d(TAG, aCat.getKey() + " : " + aCat.getLikelihood());
+                            }
+                        	userDemograph.gender = bestLikelihoodCategory;
+                        }else if(entryKey.equals("Ethnicity")){
+                        	for(AttributeCategory aCat: attributeCategories){
+                        		double likelihood = aCat.getLikelihood();
+                        		if(likelihood > highestLikelihood){
+                        			highestLikelihood = likelihood;
+                        			String aCatKey = aCat.getKey();
+                        			//DOUBLE HACK
+                        			if(aCatKey.equals("Asian")){
+                        				bestLikelihoodCategory = 1;
+                        			}else if(aCatKey.equals("African American")){
+                        				bestLikelihoodCategory = 0;
+                        			}else if(aCatKey.equals("Hispanic")){
+                        				bestLikelihoodCategory = 3;
+                        			}else if(aCatKey.equals("Caucasian")){
+                        				bestLikelihoodCategory = 2;
+                        			} 
+                        		}
+                            	Log.d(TAG, aCat.getKey() + " : " + aCat.getLikelihood());
+                            }
+                        	userDemograph.ethnicity = bestLikelihoodCategory;
+                        }else if(entryKey.equals("Income")){
+                        	for(AttributeCategory aCat: attributeCategories){
+                        		double likelihood = aCat.getLikelihood();
+                        		if(likelihood > highestLikelihood){
+                        			highestLikelihood = likelihood;
+                        			String aCatKey = aCat.getKey();
+                        			//DOUBLE HACK
+                        			if(aCatKey.equals("$30 - 60k")){
+                        				bestLikelihoodCategory = 1;
+                        			}else if(aCatKey.equals("$0 - 30k")){
+                        				bestLikelihoodCategory = 0;
+                        			}else if(aCatKey.equals("$60 - 100k")){
+                        				bestLikelihoodCategory = 2;
+                        			}else if(aCatKey.equals("$100k+")){
+                        				bestLikelihoodCategory = 3;
+                        			} 
+                        		}
+                            	Log.d(TAG, aCat.getKey() + " : " + aCat.getLikelihood());
+                            }
+                        	userDemograph.income = bestLikelihoodCategory;
+                        }else if(entryKey.equals("Kids")){
+                        	for(AttributeCategory aCat: attributeCategories){
+                        		double likelihood = aCat.getLikelihood();
+                        		if(likelihood > .5){
+                        			userDemograph.kids = true;
+                        		}else{
+                        			userDemograph.kids = false;
+                        		}
+                        		
+                            	Log.d(TAG, aCat.getKey() + " : " + aCat.getLikelihood());
+                            }
+                        }	else if(entryKey.equals("Interests")){
+                        		Vector<String> interests = new Vector<String>();
+                            	for(AttributeCategory aCat: attributeCategories){
+                            		interests.add(aCat.getKey());
+                                	Log.d(TAG, aCat.getKey() + " : " + aCat.getLikelihood());
+                                }
+                            	userDemograph.interests = interests;
+                            }
+                        
+                    	}
+                        
+                        
+                    }
+                
+            }
 
+			@Override
+			public void failure(int arg0, String arg1) {
+				// TODO Auto-generated method stub
+				userDemograph = null;
+			}
+        });
+
+  	return userDemograph;
+      
+    }
+    
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
