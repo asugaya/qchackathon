@@ -3,10 +3,13 @@ package com.company;
 import java.util.Iterator;
 import java.util.Vector;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 public class Demograph {
+	
+	public int id;
 
 	public static final int AGE_13_18 = 0;
 	public static final int AGE_18_24 = 1;
@@ -40,12 +43,13 @@ public class Demograph {
 
 	public boolean kids;
 
-	Vector<String> interests;
+	Vector<String> interests = new Vector<String>();
 
 	public JSONObject getJSONObject() {
 
 		JSONObject retval = new JSONObject();
 		try {
+			retval.put("id", id);
 			retval.put("age", age);
 			retval.put("gender", gender);
 			retval.put("education", education);
@@ -80,10 +84,12 @@ public class Demograph {
 			}else if(key.equals("income")){
 				newDemograph.income = jObject.getInt(key);
 			}else if(key.equals("interests")){
-				newDemograph.interests = (Vector<String>)jObject.get(key);
+				JSONArray interestarray = jObject.getJSONArray(key);
+				for (int i = 0; i < interestarray.length(); ++i) {
+					newDemograph.interests.add(interestarray.getString(i));
+				}
 			}else if(key.equals("kids")){
-				
-					newDemograph.kids = jObject.getBoolean(key);
+				newDemograph.kids = jObject.getBoolean(key);
 			}
 		}
 		} catch (JSONException e) {
