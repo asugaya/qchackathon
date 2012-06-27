@@ -23,12 +23,14 @@ import java.util.Vector;
 import java.util.Map;
 
 import android.app.Activity;
+import android.location.Location;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 
 import com.apx.speakersknowledge.R;
+import com.company.MyLocation.LocationResult;
 import com.qualcommlabs.context.ir.sdk.ContextImageRecognitionConnector;
 import com.qualcommlabs.context.ir.sdk.ContextImageRecognitionConnectorFactory;
 import com.qualcommlabs.usercontext.Callback;
@@ -44,6 +46,8 @@ import com.qualcommlabs.usercontext.PlaceEventListener;
 import com.qualcommlabs.usercontext.StatusCallback;
 import com.qualcommlabs.usercontext.protocol.ContentEvent;
 import com.qualcommlabs.usercontext.protocol.ContextConnectorPermissions;
+import com.qualcommlabs.usercontext.protocol.GeoFenceCircle;
+import com.qualcommlabs.usercontext.protocol.Place;
 import com.qualcommlabs.usercontext.protocol.PlaceEvent;
 import com.qualcommlabs.usercontext.protocol.profile.AttributeCategory;
 import com.qualcommlabs.usercontext.protocol.profile.Profile;
@@ -58,7 +62,12 @@ public class SpeakersKnowledgeActivity extends Activity implements OnClickListen
     private ContextPlaceConnector contextPlaceConnector;
     private ContextImageRecognitionConnector imageRecognitionConnector;
     private Demograph userDemograph;
+    
+    private long currentPlaceID = 0;
 
+    /***
+     * This gets called when user enters/exits a place.
+     */
     PlaceEventListener placeEventListener = new PlaceEventListener() {
         @Override
         public void placeEvent(PlaceEvent placeEvent) {
@@ -77,6 +86,99 @@ public class SpeakersKnowledgeActivity extends Activity implements OnClickListen
             checkContextConnectorStatus();
         }
     };
+    
+    
+    /***
+     * Get current location by doing the following:
+     
+    LocationResult locationResult = new LocationResult(){
+        @Override
+        public void gotLocation(Location location){
+        	if(location != null){
+            	//Got the location!
+             }
+        }
+    };
+    MyLocation myLocation = new MyLocation();
+    myLocation.getLocation(this, locationResult);
+    
+    */
+    
+    /***
+     * TODO: 
+     * 1.Get a a list of geofences from the serve
+     * 2.Set up local geofences
+     * 3.Notify when entering/exiting geofences
+     * 
+     * 
+     */
+    /***
+     * This function sets up geofences
+     * @param geofences is a map of an android location to radii
+     */
+    public void setGeofences(Map<Location, Integer> geofences){
+    	removeGeofences();
+    	for(Map.Entry<Location, Integer> entry : geofences.entrySet()){
+    		Place newPlace = new Place();
+    		GeoFenceCircle newGeoFence = new GeoFenceCircle();
+    		Location key = entry.getKey();
+    		newGeoFence.setLatitude(key.getLatitude());
+    		newGeoFence.setLongitude(key.getLongitude());
+    		newGeoFence.setRadius(entry.getValue());
+    		newPlace.setGeoFence(newGeoFence);
+    		newPlace.setId(currentPlaceID);
+    		currentPlaceID++;
+    		contextPlaceConnector.createPlace(newPlace, new Callback<Place>() {
+               
+
+    			@Override
+    			public void failure(int arg0, String arg1) {
+    			}
+
+				@Override
+				public void success(Place arg0) {
+					// TODO Auto-generated method stub
+					//TODO Add this place to a list to be deleted later.
+					
+				}
+            });
+    		
+    	}
+    }
+    /***
+     * TODO: we should remove geofences sometime. :) -- Hopefully done.
+     */
+    public void removeGeofences(){
+    	contextPlaceConnector.allPlaces(new Callback<List<Place>>() {
+            
+
+			@Override
+			public void failure(int arg0, String arg1) {
+			}
+
+
+			@Override
+			public void success(List<Place> arg0) {
+				// TODO Auto-generated method stub
+				for (Place place: arg0){
+					contextPlaceConnector.deletePlace(place.getId(), new Callback<Void>() {
+			            
+
+						@Override
+						public void failure(int arg0, String arg1) {
+						}
+
+
+						@Override
+						public void success(Void arg0) {
+							
+						}
+					});
+				}
+			}
+        });
+    	
+    }
     
     /***
      * This returns the demograph for this user, or null if not set yet.
@@ -304,6 +406,20 @@ public class SpeakersKnowledgeActivity extends Activity implements OnClickListen
         startListeningForPermissionChanges();
         getProfileAndSendToLog();
         retrieveImageRecognitionTargets();
+        Log.d(TAG, "Getting location");
+        
+
+        LocationResult locationResult = new LocationResult(){
+            @Override
+            public void gotLocation(Location location){
+                //Got the location!
+            	if(location != null){
+            		Log.d(TAG, "Got location! " + location.toString());
+            	}
+            }
+        };
+        MyLocation myLocation = new MyLocation();
+        myLocation.getLocation(this, locationResult);
     }
 
     private void retrieveImageRecognitionTargets() {
@@ -375,6 +491,7 @@ public class SpeakersKnowledgeActivity extends Activity implements OnClickListen
 
     private void startListeningForPermissionChanges() {
         contextCoreConnector.addPermissionChangeListener(permissionChangeListener);
+        
     }
 
     private void stopListeningForPlaceEvents() {

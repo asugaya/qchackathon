@@ -82,8 +82,7 @@ public class Demograph {
 			}else if(key.equals("interests")){
 				newDemograph.interests = (Vector<String>)jObject.get(key);
 			}else if(key.equals("kids")){
-				
-					newDemograph.kids = jObject.getBoolean(key);
+				newDemograph.kids = jObject.getBoolean(key);
 			}
 		}
 		} catch (JSONException e) {
