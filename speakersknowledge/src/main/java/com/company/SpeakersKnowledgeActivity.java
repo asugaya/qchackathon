@@ -61,7 +61,7 @@ public class SpeakersKnowledgeActivity extends Activity implements OnClickListen
     private ContextInterestsConnector contextInterestsConnector;
     private ContextPlaceConnector contextPlaceConnector;
     private ContextImageRecognitionConnector imageRecognitionConnector;
-    private Demograph userDemograph;
+    private Demograph userDemograph = new Demograph();
     
     private long currentPlaceID = 0;
 
@@ -138,7 +138,6 @@ public class SpeakersKnowledgeActivity extends Activity implements OnClickListen
 				@Override
 				public void success(Place arg0) {
 					// TODO Auto-generated method stub
-					//TODO Add this place to a list to be deleted later.
 					
 				}
             });
@@ -329,6 +328,7 @@ public class SpeakersKnowledgeActivity extends Activity implements OnClickListen
 			public void failure(int arg0, String arg1) {
 				// TODO Auto-generated method stub
 				userDemograph = null;
+				Log.d(TAG, "Failed: " + arg1);
 			}
         });
 
@@ -405,9 +405,9 @@ public class SpeakersKnowledgeActivity extends Activity implements OnClickListen
         getLatestPlaceEventsAndStartListeningForPlaceEvents();
         startListeningForPermissionChanges();
         getProfileAndSendToLog();
+        getDemograph();
         retrieveImageRecognitionTargets();
         Log.d(TAG, "Getting location");
-        
 
         LocationResult locationResult = new LocationResult(){
             @Override
